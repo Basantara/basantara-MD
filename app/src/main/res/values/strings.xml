@@ -1,0 +1,38 @@
+<resources>
+    <string name="app_name">Basantara</string>
+    <string name="title_activity_home">HomeActivity</string>
+    <string name="title_home">Home</string>
+    <string name="title_dashboard">Live Scanning</string>
+    <string name="title_notifications">Notifications</string>
+    <string name="bottom_scanning">Scanning</string>
+    <string name="bottom_profile">Profile</string>
+    <string name="back_arrow">Kembali</string>
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+
+
+    <string name="_01">01</string>
+    <string name="perkenalan">Perkenalan</string>
+    <string name="selamat_datang">Selamat Datang</string>
+    <string name="agus_supratman">Agus Supratman</string>
+    <string name="app">Basantara Apps</string>
+    <string name="desc">Aplikasi Sign Language Keren</string>
+    <string name="topik_pembelajaran">Topik Pembelajaran</string>
+    <string name="_02">02</string>
+    <string name="scanning">Scanning</string>
+    <string name="_03">03</string>
+    <string name="live_scan">Live Scan</string>
+    <string name="basantara">BASANTARA</string>
+    <string name="searchbar_hint">Cari Alphabet A - Z</string>
+    <string name="icon_description">icon  basantara\n</string>
+    <string name="invalid_password">Password Salah\n</string>
+    <string name="failed_login">gagal login</string>
+    <string name="message_login">Akhirnya masuk</string>
+    <string name="camera">Camera</string>
+    <string name="camera_x">Camera X</string>
+    <string name="gallery">Gallery</string>
+    <string name="upload">Upload</string>
+    <string name="image_classifier_failed">Gagal menganalisa gambar</string>
+    <string name="empty_image">Tidak ada gambar</string>
+
+</resources>

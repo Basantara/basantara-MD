@@ -1,0 +1,18 @@
+<shape xmlns:android="http://schemas.android.com/apk/res/android"
+    android:shape="rectangle">
+
+    <solid android:color="#5936B4"/> <!-- Warna persegi panjang -->
+
+    <corners android:radius="40dp"/> <!-- Sudut tumpul -->
+
+    <!-- Desain bentuk custom dengan pemotongan 1/4 -->
+    <path
+        android:fillColor="#5936B4"
+        android:pathData="M0,0
+                         L75,0
+                         L75,50
+                         L37.5,50
+                         L37.5,100
+                         L0,100
+                         Z"/>
+</shape>
