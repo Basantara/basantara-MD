@@ -3,6 +3,9 @@
 ## Deskripsi Singkat
 BasantaraApps adalah aplikasi berbasis Android yang dirancang untuk individu yang tertarik belajar bahasa isyarat. Aplikasi ini menyediakan sumber daya yang komprehensif mengenai alfabet bahasa isyarat dan frasa umum, serta menawarkan latihan interaktif dan pelacakan kemajuan pengguna.
 
+##untuk mengecek Commit yang lama dalam repository pribadi:
+https://github.com/Rizald95/BasantaraApps.git
+
 ## Daftar Isi
 1. [Ruang Lingkup Proyek & Deliverables](#ruang-lingkup-proyek--deliverables)
 2. [Fitur Utama](#fitur-utama)
