@@ -18,7 +18,7 @@ android {
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
         buildConfigField("String", "API_URL", "\"https://basantara-api-2akzaauh3q-et.a.run.app/\"")
-        buildConfigField("String", "API_ML", "\"https://dev-basantara-ml-api-2akzaauh3q-et.a.run.app/\"")
+        buildConfigField("String", "API_ML", "\"https://basantara-ml-api-2akzaauh3q-et.a.run.app/\"")
     }
 
     buildTypes {

@@ -10,24 +10,38 @@ import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.Bitmap
 import android.net.Uri
+import android.provider.MediaStore
 import android.util.Log
 import android.widget.Toast
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.activity.viewModels
 import androidx.core.content.ContextCompat
 import androidx.core.net.toUri
+import androidx.lifecycle.viewModelScope
 import com.yalantis.ucrop.UCrop
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+import lastsubmission.capstone.basantaraapps.data.responses.PredictResponse
+import lastsubmission.capstone.basantaraapps.data.retrofit.ML.ApiConfigML
 import lastsubmission.capstone.basantaraapps.databinding.ActivityMainBinding
 import lastsubmission.capstone.basantaraapps.helper.ImageClassifierHelper
 import lastsubmission.capstone.basantaraapps.helper.getImageUri
 import lastsubmission.capstone.basantaraapps.interfaces.camera.CameraActivity
 import lastsubmission.capstone.basantaraapps.interfaces.camera.CameraActivity.Companion.CAMERAX_RESULT
 import lastsubmission.capstone.basantaraapps.interfaces.result.ResultActivity
+import lastsubmission.capstone.basantaraapps.interfaces.result.ResultViewModel
+import okhttp3.MediaType.Companion.toMediaTypeOrNull
+import okhttp3.MultipartBody
+import okhttp3.RequestBody
 import org.tensorflow.lite.task.vision.classifier.Classifications
 import org.tensorflow.lite.task.vision.classifier.ImageClassifier
 import java.io.File
 import java.text.DecimalFormat
 import java.text.NumberFormat
+import retrofit2.HttpException
 
 class MainActivity : AppCompatActivity() {
 
@@ -37,6 +51,11 @@ class MainActivity : AppCompatActivity() {
 
     private lateinit var imageClassifier: ImageClassifier
     private lateinit var imageClassifierHelper: ImageClassifierHelper
+
+    private val viewModel: ResultViewModel by viewModels()
+    private val PICK_IMAGE = 100
+    private lateinit var imageUri: Uri
+
 
     private val requestPermissionLauncher =
         registerForActivityResult(
@@ -69,9 +88,8 @@ class MainActivity : AppCompatActivity() {
         binding.cameraXButton.setOnClickListener { startCameraX() }
         binding.uploadButton.setOnClickListener {
             currentImageUri?.let { uri ->
-                analyzeImage(uri)
-
-            }?: showToast(getString(R.string.empty_image))
+                uploadImage(uri)
+            } ?: showToast(getString(R.string.empty_image))
         }
 
     }
@@ -98,9 +116,10 @@ class MainActivity : AppCompatActivity() {
             }?: Log.d("Photo Picker", "no media selected")
         }
 
+    @Suppress("DEPRECATION")
     private fun startCamera() {
-        currentImageUri = getImageUri(this)
-        launcherIntentCamera.launch(currentImageUri)
+        val galleryIntent = Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI)
+        startActivityForResult(galleryIntent, PICK_IMAGE)
     }
 
     private val launcherIntentCamera = registerForActivityResult(
@@ -156,49 +175,76 @@ class MainActivity : AppCompatActivity() {
     }
 
 
-    private fun uploadImage() {
-        Toast.makeText(this, "Fitur ini belum tersedia", Toast.LENGTH_SHORT).show()
-    }
+    private fun uploadImage(uri: Uri) {
+        binding.progressIndicator.visibility = android.view.View.VISIBLE
 
-    private fun analyzeImage(uri: Uri) {
-        imageClassifierHelper = ImageClassifierHelper(
-            context = this,
-            classifierListener = object : ImageClassifierHelper.ClassifierListener {
-                override fun onError(error: String) {
-                    runOnUiThread {
-                        Toast.makeText(this@MainActivity, error, Toast.LENGTH_SHORT).show()
-                    }
-                }
+        val file = File(uri.path ?: return)
+        val requestFile = RequestBody.create("image/jpeg".toMediaTypeOrNull(), file)
+        val multipartBody = MultipartBody.Part.createFormData("imageFile", file.name, requestFile)
 
-                override fun onResults(results: List<Classifications>?, inferenceTime: Long) {
-                    runOnUiThread {
-                        results?.let { it ->
-                            if (it.isNotEmpty() && it[0].categories.isNotEmpty()) {
-                                println(it)
-                                val sortedCategories =
-                                    it[0].categories.sortedByDescending { it?.score }
-                                val displayResult =
-                                    sortedCategories.joinToString("\n") {
-                                        "${it.label} " + DecimalFormat("#.##").format(it.score).trim()
-                                            .format(it.score).trim()
-                                    }
-                                moveResultIntent(uri, displayResult)
-                            }
+        CoroutineScope(Dispatchers.IO).launch {
+            try {
+                val response = ApiConfigML.getApiService().predict(multipartBody).execute()
+                if (response.isSuccessful) {
+                    response.body()?.let {
+                        withContext(Dispatchers.Main) {
+                            binding.progressIndicator.visibility = android.view.View.GONE
+                            moveResultIntent(uri, it)
                         }
                     }
+                } else {
+                    withContext(Dispatchers.Main) {
+                        binding.progressIndicator.visibility = android.view.View.GONE
+                        showToast("Error: ${response.message()}")
+                    }
+                }
+            } catch (e: HttpException) {
+                withContext(Dispatchers.Main) {
+                    binding.progressIndicator.visibility = android.view.View.GONE
+                    showToast("Error: ${e.message()}")
                 }
             }
-        )
-        imageClassifierHelper.classifyStaticImage(uri)
+        }
     }
-    
-    private fun moveResultIntent(uri: Uri, result: String) {
+
+//    private fun analyzeImage(uri: Uri) {
+//        imageClassifierHelper = ImageClassifierHelper(
+//            context = this,
+//            classifierListener = object : ImageClassifierHelper.ClassifierListener {
+//                override fun onError(error: String) {
+//                    runOnUiThread {
+//                        Toast.makeText(this@MainActivity, error, Toast.LENGTH_SHORT).show()
+//                    }
+//                }
+//
+//                override fun onResults(results: List<Classifications>?, inferenceTime: Long) {
+//                    runOnUiThread {
+//                        results?.let { it ->
+//                            if (it.isNotEmpty() && it[0].categories.isNotEmpty()) {
+//                                println(it)
+//                                val sortedCategories =
+//                                    it[0].categories.sortedByDescending { it?.score }
+//                                val displayResult =
+//                                    sortedCategories.joinToString("\n") {
+//                                        "${it.label} " + DecimalFormat("#.##").format(it.score).trim()
+//                                            .format(it.score).trim()
+//                                    }
+//                                moveResultIntent(uri, displayResult)
+//                            }
+//                        }
+//                    }
+//                }
+//            }
+//        )
+//        imageClassifierHelper.classifyStaticImage(uri)
+//    }
+
+    private fun moveResultIntent(uri: Uri, response: PredictResponse) {
         val intent = Intent(this, ResultActivity::class.java).apply {
             putExtra(ResultActivity.EXTRA_IMAGE_URI, uri.toString())
-            putExtra(ResultActivity.EXTRA_RESULT, result)
+            putExtra(ResultActivity.EXTRA_RESULT, "${response.data.className} (${response.data.confidenceScore})")
         }
         startActivity(intent)
-
     }
 
     private fun showToast(message: String) {
