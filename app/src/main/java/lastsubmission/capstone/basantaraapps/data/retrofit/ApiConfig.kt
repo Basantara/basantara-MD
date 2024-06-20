@@ -5,6 +5,7 @@ import okhttp3.logging.HttpLoggingInterceptor
 import okhttp3.OkHttpClient
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
+import lastsubmission.capstone.basantaraapps.data.retrofit.AuthInterceptor
 
 object ApiConfig {
     private const val baseUrl = BuildConfig.API_URL
@@ -20,10 +21,11 @@ object ApiConfig {
 
         val client = OkHttpClient.Builder()
             .addInterceptor(loggingInterceptor)
+           // .addInterceptor(AuthInterceptor(token))
             .build()
 
         val retrofit = Retrofit.Builder()
-            .baseUrl(baseUrl) // Constants should be in uppercase by convention
+            .baseUrl(baseUrl)
             .addConverterFactory(GsonConverterFactory.create())
             .client(client)
             .build()

@@ -7,27 +7,27 @@ import kotlinx.parcelize.Parcelize
 data class AlphabetResponse(
 
 	@field:SerializedName("AlphabetResponse")
-	val alphabetResponse: List<AlphabetResponseItem> = emptyList()
+	val alphabetResponse: List<AlphabetResponseItem>
 )
 
 
 data class AlphabetResponseItem(
 
 	@field:SerializedName("descriptionEN")
-	val descriptionEN: String? = null,
+	val descriptionEN: String,
 
 	@field:SerializedName("imgReal")
-	val imgReal: String? = null,
+	val imgReal: String,
 
 	@field:SerializedName("descriptionID")
-	val descriptionID: String? = null,
+	val descriptionID: String,
 
 	@field:SerializedName("imgVector")
-	val imgVector: String? = null,
+	val imgVector: String,
 
 	@field:SerializedName("name")
-	val name: String? = null,
+	val name: String,
 
 	@field:SerializedName("id")
-	val id: Int? = null
+	val id: Int
 )

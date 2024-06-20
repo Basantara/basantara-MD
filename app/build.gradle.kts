@@ -115,6 +115,9 @@ dependencies {
     implementation("androidx.paging:paging-runtime:3.3.0")
     implementation("androidx.room:room-paging:2.6.1")
 
+    //gson
+    implementation ("com.google.code.gson:gson:2.8.8")
+
 
 
 

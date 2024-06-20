@@ -13,7 +13,7 @@ class LoginViewModel(private val userRepository: UserRepository): ViewModel() {
     val loginAction: LiveData<Result<LoginUserResponse>> = _loginAction
 
     fun login_optional(email: String, password: String) {
-        val liveData = userRepository.login(email, password)
+        val liveData = userRepository.logins(email, password)
         _loginAction.addSource(liveData) {
             result -> _loginAction.value = result
         }

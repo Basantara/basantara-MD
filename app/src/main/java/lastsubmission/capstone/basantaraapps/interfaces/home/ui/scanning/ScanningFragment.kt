@@ -9,10 +9,12 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 
 import lastsubmission.capstone.basantaraapps.databinding.FragmentScanningBinding
+import lastsubmission.capstone.basantaraapps.helper.ImageClassifierHelper
 
 class ScanningFragment : Fragment() {
 
     private var _binding: FragmentScanningBinding? = null
+    private lateinit var imageClassifierHelper: ImageClassifierHelper
 
     // This property is only valid between onCreateView and
     // onDestroyView.
@@ -28,7 +30,7 @@ class ScanningFragment : Fragment() {
         _binding = FragmentScanningBinding.inflate(inflater, container, false)
         val root: View = binding.root
 
-        val textView: TextView = binding.textDashboard
+
 
         return root
     }

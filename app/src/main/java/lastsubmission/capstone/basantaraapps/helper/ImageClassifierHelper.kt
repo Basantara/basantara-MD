@@ -18,6 +18,8 @@ import org.tensorflow.lite.task.core.BaseOptions
 import java.io.IOException
 
 
+
+
 class ImageClassifierHelper(
     var threshold: Float = 0.1f,
     var maxResult: Int = 1,
@@ -35,7 +37,7 @@ class ImageClassifierHelper(
     }
 
     private fun setupImageClassifier() {
-        // TODO: Menyiapkan Image Classifier untuk memproses gambar.
+
         val optionsBuilder = ImageClassifier.ImageClassifierOptions.builder()
             .setScoreThreshold(threshold)
             .setMaxResults(maxResult)
@@ -54,22 +56,61 @@ class ImageClassifierHelper(
     }
 
     fun classifyStaticImage(imageUri: Uri) {
+
+//        if (imageClassifier == null) {
+//            setupImageClassifier()
+//        }
+//
+//        val imageProcessor = ImageProcessor.Builder()
+//            .add(ResizeOp(224, 224, ResizeOp.ResizeMethod.NEAREST_NEIGHBOR))
+//            .add(CastOp(DataType.UINT8))
+//            .build()
+//
+//        val bitmap = uriToBitmap(context, imageUri)
+//        val imageTensor = imageProcessor.process(TensorImage.fromBitmap(bitmap))
+//
+//        var inferenceTime = SystemClock.uptimeMillis()
+//        val results = imageClassifier?.classify(imageTensor)
+//        inferenceTime = SystemClock.uptimeMillis() -inferenceTime
+//        classifierListener?.onResults(results, inferenceTime)
         // TODO: mengklasifikasikan imageUri dari gambar statis.
         if (imageClassifier == null) {
             setupImageClassifier()
         }
 
+        // Processor gambar
         val imageProcessor = ImageProcessor.Builder()
             .add(ResizeOp(224, 224, ResizeOp.ResizeMethod.NEAREST_NEIGHBOR))
-            .add(CastOp(DataType.UINT8))
             .build()
 
         val bitmap = uriToBitmap(context, imageUri)
-        val imageTensor = imageProcessor.process(TensorImage.fromBitmap(bitmap))
+        val inputImage = TensorImage(DataType.FLOAT32)
+        inputImage.load(bitmap)
 
+        // Normalisasi manual
+        val buffer = inputImage.buffer
+        val pixels = FloatArray(224 * 224 * 3) // Jumlah piksel (224x224) x 3 (RGB)
+
+        for (i in 0 until 224 * 224) {
+            pixels[i * 3] = ((buffer.getFloat(i * 3) - MEAN) / STD_DEV) // R
+            pixels[i * 3 + 1] = ((buffer.getFloat(i * 3 + 1) - MEAN) / STD_DEV) // G
+            pixels[i * 3 + 2] = ((buffer.getFloat(i * 3 + 2) - MEAN) / STD_DEV) // B
+        }
+
+        // Isi kembali buffer dengan nilai piksel yang telah dinormalisasi
+        for (i in 0 until 224 * 224 * 3) {
+            buffer.putFloat(i * 4, pixels[i])
+        }
+
+        // Terapkan image processor ke gambar masukan
+        val processedImage = imageProcessor.process(inputImage)
+
+        // Lakukan inferensi
         var inferenceTime = SystemClock.uptimeMillis()
-        val results = imageClassifier?.classify(imageTensor)
-        inferenceTime = SystemClock.uptimeMillis() -inferenceTime
+        val results = imageClassifier?.classify(processedImage)
+        inferenceTime = SystemClock.uptimeMillis() - inferenceTime
+
+        // Handle hasil
         classifierListener?.onResults(results, inferenceTime)
 
     }
@@ -89,5 +130,7 @@ class ImageClassifierHelper(
 
     companion object {
         private const val TAG = "ImageClassifierHelper"
+        private const val MEAN = 127.5f // Sesuaikan dengan nilai mean dari model Anda
+        private const val STD_DEV = 127.5f // Sesuaikan dengan nilai std dev dari model Anda
     }
 }

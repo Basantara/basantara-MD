@@ -5,9 +5,11 @@ import lastsubmission.capstone.basantaraapps.repository.UserRepository
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import lastsubmission.capstone.basantaraapps.dependencies.Injection
+import lastsubmission.capstone.basantaraapps.interfaces.alphabet.ListAlphabetViewModel
 import lastsubmission.capstone.basantaraapps.interfaces.login.LoginViewModel
 import lastsubmission.capstone.basantaraapps.interfaces.register.RegisterViewModel
 
+@Suppress("UNCHECKED_CAST")
 class ViewModelFactory(private val userRepository: UserRepository): ViewModelProvider.NewInstanceFactory() {
 
     override fun <T : ViewModel> create(modelClass: Class<T>): T {
@@ -18,6 +20,9 @@ class ViewModelFactory(private val userRepository: UserRepository): ViewModelPro
             }
             modelClass.isAssignableFrom(RegisterViewModel::class.java) -> {
                 RegisterViewModel(userRepository) as T
+            }
+            modelClass.isAssignableFrom(ListAlphabetViewModel::class.java) -> {
+                ListAlphabetViewModel(userRepository) as T
             }
 
             else -> throw  IllegalArgumentException("Unknown ViewModel class: " + modelClass.name)
@@ -38,4 +43,6 @@ class ViewModelFactory(private val userRepository: UserRepository): ViewModelPro
         }
     }
 
-}
+
+    }
+

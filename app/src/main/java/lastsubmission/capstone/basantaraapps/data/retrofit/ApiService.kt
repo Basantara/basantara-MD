@@ -1,5 +1,6 @@
 package lastsubmission.capstone.basantaraapps.data.retrofit
 
+import com.google.gson.JsonObject
 import lastsubmission.capstone.basantaraapps.data.responses.AlphabetRandomResponse
 import lastsubmission.capstone.basantaraapps.data.responses.AlphabetResponse
 import lastsubmission.capstone.basantaraapps.data.responses.AlphabetResponseItem
@@ -12,6 +13,7 @@ import retrofit2.http.GET
 import retrofit2.http.POST
 import retrofit2.Call
 import retrofit2.http.Body
+import retrofit2.http.Header
 
 interface ApiService  {
 
@@ -31,6 +33,13 @@ interface ApiService  {
         password: String
     ) : LoginUserResponse
 
+    @FormUrlEncoded
+    @POST("api/users/login")
+    suspend fun logins(
+        @Body auth: JsonObject
+    ): LoginUserResponse
+
+
     @POST("api/users/login")
     fun login(@Body requestBody: LoginRequestBody): Call<LoginUserResponse>
 
@@ -49,6 +58,8 @@ interface ApiService  {
         password: String
     ): RegisterUserResponse
 
+
+
     @FormUrlEncoded
     @POST("api/users/register")
     suspend fun register(
@@ -56,14 +67,16 @@ interface ApiService  {
     ): RegisterUserResponse
 
     @GET("api/alphabets")
-    suspend fun getAlphabet() : AlphabetResponse
+    suspend fun getAllAlphabet() : AlphabetResponse
 
 
     @GET("api/alphabets")
     fun getAlphabets(): Call<AlphabetResponse>
 
     @GET("api/alphabets")
-    suspend fun getAlphabetOptional(): List<AlphabetResponseItem>
+    suspend fun getAlphabets(@Header("Authorization") token: String): AlphabetResponse
+
+
 
     @GET("api/alphabets/random")
     suspend fun getAlphabetRandom(): AlphabetRandomResponse

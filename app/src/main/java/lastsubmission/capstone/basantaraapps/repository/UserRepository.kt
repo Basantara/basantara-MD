@@ -1,7 +1,10 @@
 package lastsubmission.capstone.basantaraapps.repository
 
+
+import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.liveData
+import com.google.gson.JsonObject
 import kotlinx.coroutines.Dispatchers
 import lastsubmission.capstone.basantaraapps.data.preferences.UserModel
 import lastsubmission.capstone.basantaraapps.data.preferences.UserModelPreferences
@@ -13,6 +16,8 @@ import kotlinx.coroutines.flow.Flow
 import lastsubmission.capstone.basantaraapps.data.responses.LoginUserResponse
 import lastsubmission.capstone.basantaraapps.data.responses.RegisterUserRequest
 import lastsubmission.capstone.basantaraapps.data.responses.RegisterUserResponse
+import retrofit2.HttpException
+import java.io.IOException
 
 class UserRepository private constructor( private val userModelPreferences: UserModelPreferences, private val apiService: ApiService) {
 
@@ -44,25 +49,50 @@ class UserRepository private constructor( private val userModelPreferences: User
     }
 
 
-    fun getListAlphabets(): LiveData<Result<List<AlphabetResponseItem>>> = liveData(Dispatchers.IO) {
-        emit(Result.Loading)
-        try {
-            val response = apiService.getAlphabetOptional()
-            emit(Result.Success(response))
-        } catch (e: Exception) {
-            emit(Result.Error(e.message.toString()))
-        }
-    }
-
     fun getListAlphabet(): LiveData<Result<AlphabetResponse>> = liveData(Dispatchers.IO) {
         emit(Result.Loading)
         try {
-            val response = apiService.getAlphabet()
-            emit(Result.Success(response))
+            val response = apiService.getAlphabets().execute()
+            if (response.isSuccessful) {
+                val alphabetResponse = response.body()
+                if (alphabetResponse != null) {
+                    emit(Result.Success(alphabetResponse))
+                } else {
+                    emit(Result.Error("Response body is null"))
+                }
+            } else {
+                emit(Result.Error(response.message()))
+            }
         } catch (e: Exception) {
             emit(Result.Error(e.message.toString()))
         }
     }
+   suspend fun getAlphabetsCuy(token: String): AlphabetResponse {
+       Log.d("UserRepository", "Fetching alphabets with token: $token")
+        return apiService.getAlphabets(token)
+   }
+
+    fun logins(email: String, password: String): LiveData<Result<LoginUserResponse>> = liveData(Dispatchers.IO) {
+        emit(Result.Loading)
+        try {
+            val jsonObject = JsonObject().apply {
+                addProperty("email", email)
+                addProperty("password", password)
+            }
+
+            val response = apiService.logins(jsonObject)
+
+            emit(Result.Success(response))
+        } catch (e: IOException) {
+            emit(Result.Error("Network error: ${e.message}"))
+        } catch (e: HttpException) {
+            emit(Result.Error("API error: ${e.message}"))
+        } catch (e: Exception) {
+            emit(Result.Error("Unexpected error: ${e.message}"))
+        }
+    }
+
+
 
     suspend fun logout() {
         userModelPreferences.logout()
@@ -72,8 +102,6 @@ class UserRepository private constructor( private val userModelPreferences: User
         return userModelPreferences.getSession()
     }
 
-
-
     companion object {
         @Volatile
         private var instance : UserRepository? = null
@@ -82,4 +110,6 @@ class UserRepository private constructor( private val userModelPreferences: User
             instance ?: UserRepository(userModelPreferences, apiService)
         }.also { instance = it }
     }
+
+
 }

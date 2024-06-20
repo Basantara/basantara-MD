@@ -19,6 +19,7 @@ import lastsubmission.capstone.basantaraapps.R
 import lastsubmission.capstone.basantaraapps.data.dummy.LoginData
 import lastsubmission.capstone.basantaraapps.databinding.ActivityLoginBinding
 import lastsubmission.capstone.basantaraapps.helper.ViewModelFactory
+import lastsubmission.capstone.basantaraapps.interfaces.home.HomeActivity
 import lastsubmission.capstone.basantaraapps.interfaces.home.ui.home.HomeFragment
 import lastsubmission.capstone.basantaraapps.interfaces.register.RegisterActivity
 
@@ -33,34 +34,46 @@ class LoginActivity : AppCompatActivity() {
         binding = ActivityLoginBinding.inflate(layoutInflater)
         setContentView(binding.root)
         setupView()
+
+        // Contoh penggunaan logins untuk melakukan login
+        val email = "tes@tes.com"
+        val password = "password"
+
         setupAction()
         playAnimation()
 
 
-        loginViewModel.loginAction.observe(this) { result ->
-            when (result) {
-                is Result.Loading -> {
-                    showLoading(true)
-                }
-                is Result.Success -> {
-                    showLoading(false)
-                    AlertDialog.Builder(this).apply {
-                        setTitle("Berhasil!")
-                        setMessage(R.string.message_login)
-                        setPositiveButton("Ke Halaman Utama") { _, _ ->
-                            replaceHomeFragment()
-                        }
-                        create()
-                        show()
-                    }
-                }
-                is Result.Error -> {
-                    toastFailed()
-                    showLoading(false)
-                }
-            }
-        }
 
+
+//        loginViewModel.loginAction.observe(this) { result ->
+//            when (result) {
+//                is Result.Loading -> {
+//                    showLoading(true)
+//                }
+//                is Result.Success -> {
+//                    showLoading(false)
+//                    AlertDialog.Builder(this).apply {
+//                        setTitle("Berhasil!")
+//                        setMessage(R.string.message_login)
+//                        setPositiveButton("Ke Halaman Utama") { _, _ ->
+//                            replaceHomeFragment()
+//                        }
+//                        create()
+//                        show()
+//                    }
+//                }
+//                is Result.Error -> {
+//                    toastFailed()
+//                    showLoading(false)
+//                }
+//            }
+//        }
+
+    }
+
+    private fun getToken(): String {
+        // Return the provided token
+        return "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpYXQiOjE3MTg4NDU1MDR9.9OEGX2DYMHeSIYzjNpmLYGbl3p83ahYwK7tMTjhDiTs"
     }
 
 
@@ -84,7 +97,35 @@ class LoginActivity : AppCompatActivity() {
                 val password = etPassword.text.toString().trim()
 
                 if (email.isNotEmpty() && password.isNotEmpty()) {
-                    loginViewModel.login_optional(email, password)
+                    loginViewModel.login(email, password).observe(this@LoginActivity) { result ->
+                        when (result) {
+                            is Result.Loading -> {
+                                showLoading(true)
+                            }
+                            is Result.Success -> {
+                                showLoading(false)
+                                val loginUserResponse = result.data
+                                val username = loginUserResponse.data?.username
+                                val userEmail = loginUserResponse.data?.email
+                                val token = loginUserResponse.token
+                                AlertDialog.Builder(this@LoginActivity).apply {
+                                    setTitle("Berhasil!")
+                                    setMessage(R.string.message_login)
+                                    setPositiveButton("Ke Halaman Utama") { _, _ ->
+//                                        replaceHomeFragment()
+                                        val intent = Intent(this@LoginActivity, HomeActivity::class.java)
+                                        startActivity(intent)
+                                    }
+                                    create()
+                                    show()
+                                }
+                            }
+                            is Result.Error -> {
+                                showLoading(false)
+                                toastFailed()
+                            }
+                        }
+                    }
                 } else {
                     Toast.makeText(
                         this@LoginActivity,

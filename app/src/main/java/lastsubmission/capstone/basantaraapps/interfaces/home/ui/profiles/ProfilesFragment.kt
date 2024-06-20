@@ -28,7 +28,7 @@ class ProfilesFragment : Fragment() {
 
         // Fetch username from SharedPreferences
         val sharedPreferences = activity?.getSharedPreferences("UserPreferences", Context.MODE_PRIVATE)
-        val username = sharedPreferences?.getString("username", "Username not found")
+        val username = sharedPreferences?.getString("username", "test")
 
         // Set the username to the TextView
         binding.tvName.text = username

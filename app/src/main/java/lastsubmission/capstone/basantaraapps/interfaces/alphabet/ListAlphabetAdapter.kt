@@ -9,26 +9,22 @@ import lastsubmission.capstone.basantaraapps.data.responses.AlphabetResponseItem
 import lastsubmission.capstone.basantaraapps.databinding.AlphabetCvBinding
 
 class ListAlphabetAdapter(
-    private val context: Context,
     private val alphabetList: List<AlphabetResponseItem>
 ) : RecyclerView.Adapter<ListAlphabetAdapter.AlphabetViewHolder>() {
+    private var filteredAlphabetList: List<AlphabetResponseItem> = alphabetList
 
-    inner class AlphabetViewHolder(private val binding: AlphabetCvBinding) : RecyclerView.ViewHolder(binding.root) {
+    class AlphabetViewHolder(private val binding: AlphabetCvBinding) : RecyclerView.ViewHolder(binding.root) {
         fun bind(item: AlphabetResponseItem) {
             // Bind data to views
             binding.tvNameAlphabet.text = item.name
             binding.tvDescription.text = item.descriptionID
 
             // Load image using Glide or any other image loading library
-            Glide.with(context)
+            Glide.with(itemView.context)
                 .load(item.imgVector)
                 .centerCrop()
                 .into(binding.tvPicture)
 
-            // Implement click listener if needed
-            binding.root.setOnClickListener {
-                // Handle item click if required
-            }
         }
     }
 
@@ -38,11 +34,20 @@ class ListAlphabetAdapter(
     }
 
     override fun onBindViewHolder(holder: AlphabetViewHolder, position: Int) {
-        val item = alphabetList[position]
+        val item = filteredAlphabetList[position]
         holder.bind(item)
     }
 
     override fun getItemCount(): Int {
-        return alphabetList.size
+        return filteredAlphabetList.size
+    }
+
+    fun filter(query: String) {
+        filteredAlphabetList = if (query.isEmpty()) {
+            alphabetList
+        } else {
+            alphabetList.filter { it.name?.contains(query, ignoreCase = true) == true }
+        }
+        notifyDataSetChanged()
     }
 }

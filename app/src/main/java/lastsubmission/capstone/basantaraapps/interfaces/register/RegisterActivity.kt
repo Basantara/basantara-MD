@@ -37,6 +37,11 @@ class RegisterActivity : AppCompatActivity() {
 
     }
 
+    private fun getToken(): String {
+        // Return the provided token
+        return "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpYXQiOjE3MTg4NDU1MDR9.9OEGX2DYMHeSIYzjNpmLYGbl3p83ahYwK7tMTjhDiTs"
+    }
+
     private fun setupListeners() {
         binding.btnRegister.setOnClickListener {
             val username = binding.etName.text.toString()

@@ -11,42 +11,35 @@ import retrofit2.Callback
 import retrofit2.Response
 import android.util.Log
 import androidx.lifecycle.asLiveData
+import androidx.lifecycle.viewModelScope
+import kotlinx.coroutines.launch
 import lastsubmission.capstone.basantaraapps.data.responses.AlphabetResponse
+import lastsubmission.capstone.basantaraapps.repository.UserRepository
+import lastsubmission.capstone.basantaraapps.helper.Result
 
-class ListAlphabetViewModel: ViewModel() {
+class ListAlphabetViewModel(private val userRepository: UserRepository): ViewModel() {
     private val _alphabetList = MutableLiveData<List<AlphabetResponseItem>>()
     val alphabetList: LiveData<List<AlphabetResponseItem>> = _alphabetList
-
     private val _isLoading = MutableLiveData<Boolean>()
     val isLoading: LiveData<Boolean> = _isLoading
-
     private val _isError = MutableLiveData<Boolean>()
     val isError: LiveData<Boolean> = _isError
+    val alphabets: LiveData<Result<AlphabetResponse>> = userRepository.getListAlphabet()
 
-    init {
-        fetchAlphabets()
+    private val _alphabets = MutableLiveData<Result<AlphabetResponse>>()
+    val alphabet: LiveData<Result<AlphabetResponse>> = _alphabets
+
+    fun fetchAlphabets(token: String) {
+        viewModelScope.launch {
+            _alphabets.value = Result.Loading
+            try {
+                val response = userRepository.getAlphabetsCuy("Bearer $token")
+                _alphabets.value = Result.Success(response)
+            } catch (e: Exception) {
+                _alphabets.value = Result.Error(e.message.toString())
+            }
+        }
     }
 
-    private fun fetchAlphabets() {
-        _isLoading.value = true
-        _isError.value = false
-        val client = ApiConfig.getApiService().getAlphabets()
-        client.enqueue(object : Callback<AlphabetResponse> {
-            override fun onResponse(call: Call<AlphabetResponse>, response: Response<AlphabetResponse>) {
-                _isLoading.value = false
-                if (response.isSuccessful) {
-                    _alphabetList.value = response.body()?.alphabetResponse
-                } else {
-                    _isError.value = true
-                    Log.e(TAG, "Error: ${response.message()}")
-                }
-            }
 
-            override fun onFailure(call: Call<AlphabetResponse>, t: Throwable) {
-                _isLoading.value = false
-                _isError.value = true
-                Log.e(TAG, "Failure: ${t.message}")
-            }
-        })
-    }
 }

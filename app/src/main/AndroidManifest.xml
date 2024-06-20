@@ -28,16 +28,19 @@
             android:exported="false" />
         <activity
             android:name=".interfaces.home.HomeActivity"
+            android:exported="false">
+
+        </activity>
+        <activity
+            android:name=".interfaces.splashscreen.SplashActivity"
             android:exported="true">
+
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity
-            android:name=".interfaces.splashscreen.SplashActivity"
-            android:exported="false"></activity>
         <activity
             android:name=".interfaces.upload.UploadActivity"
             android:exported="false" />
